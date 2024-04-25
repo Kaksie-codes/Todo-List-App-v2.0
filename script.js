@@ -1,79 +1,155 @@
-//DOM Manipulators
+// DOM Manipulators
 const inputEl = document.querySelector('#input');
-const filterAll = document.querySelector('#all');
-const filterPending = document.querySelector('#pending');
-const filterCompleted = document.querySelector('#completed');
-const clearBtn = document.querySelector('.clear-btn');
 const tasks = document.querySelector('.task-box');
-const show_menu = document.querySelector('.fa-ellipsis-h');
-// console.log(tasks)
+const deleteAllBtn = document.querySelector('.clear-btn')
 
-
-//Event Listeners
+deleteAllBtn.addEventListener('click', () => {
+    allTodoItems = [];
+    displayTodos();
+})
+// Event Listeners
 inputEl.addEventListener('keyup', addTodo);
-clearBtn.addEventListener('click', deleteAllTodos); 
-show_menu.addEventListener('click', showMenu);
 
-//Functions
+// Functions
+let allTodoItems = [];
 
-function addTodo(e){
-     //Remove unwanted spaces when the user enters a task
-    const task = inputEl.value.trim();    
-    if(e.key == 'Enter' && task == false){
-        // alert('Enter Valid Task');
-        console.log('Invalid Task')  
-    }else if(e.key == 'Enter'  && task){
-        console.log('Valid Task')
-        console.log(task)
+function addTodo(e) {
+    // Remove unwanted spaces when the user enters a task
+    let task = inputEl.value.trim();
+    if (e.key == 'Enter' && task) {
 
-    //create a new task once the user presses enter
-    const taskEl = document.createElement('li');
-    taskEl.classList.add('task');
-    tasks.appendChild(taskEl);
-    // taskEl.innerText = task
+        // Create a new task once the user presses enter
+        const taskEl = document.createElement('li');
+        taskEl.classList.add('task');
 
-    const label = document.createElement('label');
-    taskEl.appendChild(label);
+        const contentEl = document.createElement('div');
+        contentEl.classList.add('content');
+        taskEl.appendChild(contentEl);
 
-    const check_el = document.createElement('input');
-    check_el.setAttribute('type', 'checkbox');
-    label.appendChild(check_el);
+        const check_el = document.createElement('input');
+        check_el.setAttribute('type', 'checkbox');
+        contentEl.appendChild(check_el);
 
-    const task_el = document.createElement('p');
-    label.appendChild(task_el);
-    task_el.innerText = task;
+        const task_el = document.createElement('P');
+        contentEl.appendChild(task_el);
+        task_el.innerText = task;
 
-    const settingZ = document.createElement('div');
-    settingZ.classList.add('settings');
-    taskEl.appendChild(settingZ);
-    settingZ.innerHTML = `<i class="fa fa-ellipsis-h" aria-hidden="true"></i>`
+        const settingEL = document.createElement('div');
+        settingEL.classList.add('settings');
+        taskEl.appendChild(settingEL);
+        
+        const modalToggleBtn = document.createElement('i');
+        modalToggleBtn.classList.add('fa', 'fa-ellipsis-h', 'open-modal');
+        modalToggleBtn.addEventListener('click', showModal)
+        settingEL.appendChild(modalToggleBtn);
 
-    const menu = document.createElement('ul');
-    menu.classList.add('task-menu');    
-    menu.innerHTML = `<li><i class="fa fa-pencil" aria-hidden="true"></i>Edit</li>
-                        <li><i class="fa fa-trash"></i>Delete</li>`
-    settingZ.appendChild(menu);
+        const modal = document.createElement('ul');
+        modal.classList.add('modal', 'modal-hide');
 
-    inputEl.value = '';
-    } 
+
+        
+        const editBtn = document.createElement('li');
+        // editBtn.setAttribute('id', 'your_id_here');
+        const editIcon = document.createElement('i');
+        editIcon.classList.add("fa", "fa-pencil");
+        const editText = document.createElement('span');
+        editText .innerText = 'Edit'
+        editBtn.appendChild(editIcon)
+        editBtn.appendChild(editText)
+        editBtn.addEventListener('click', editTodo)
+        modal.appendChild(editBtn)
+
+        const delBtn = document.createElement('li');
+        // delBtn.setAttribute('id', 'your_id_here');
+        const delIcon = document.createElement('i');
+        delIcon.classList.add("fa", "fa-trash");
+        const delText = document.createElement('span');
+        delText.innerText = 'Delete'
+        delBtn.appendChild(delIcon)
+        delBtn.appendChild(delText)
+        delBtn.addEventListener('click', deleteTodo)
+        modal.appendChild(delBtn)
+
+        settingEL.appendChild(modal) 
+
+        const index = allTodoItems.length;
+        taskEl.setAttribute('id', `todo-${index}`);        
+
+        // Add todo item to the array
+        allTodoItems.push(taskEl);
+
+        console.log(allTodoItems)
+        
+        // Call displayTodos to update the display
+        displayTodos();
+
+        inputEl.value = '';
+    }
 }
 
-function deleteAllTodos(e){
 
+
+function editTodo(e) {
+    // Traverse up the DOM to find the parent task element (li)
+    const taskToEdit = e.target.closest('.task');
+    // Find the paragraph element inside the task
+    const paragraph = taskToEdit.querySelector('.content p');
+    // Make the paragraph editable
+    paragraph.contentEditable = true;
+    // Set focus on the paragraph for editing
+    paragraph.focus();
+    const modalToShow = taskToEdit.querySelector('.modal')
+    console.log(modalToShow)
+    modalToShow.classList.remove('modal-show');
+    modalToShow.classList.add('modal-hide');
 }
 
-// function showMenu(selectedTask){
-//     //Getting Task-menu div
-//     let taskMenu = selectedTask.parentElement.lastElementChild;
-//     menu.classList.add('show');
-//     document.addEventListener('click', (e) => {
-//         //removing the class of show
-//         if(e.target.tagName != 'I' || e.target != selectedTask){
-//             taskMenu.classList.remove('show')
-//         }
-//     })
-// }
 
-function showMenu(){
-    menu.classList.add('show')
+function deleteTodo(e) {
+    // Traverse up the DOM to find the parent task element (li)
+    const taskToDelete = e.target.closest('.task');
+    // Find the index of the task in the todoItems array
+    const indexToDelete = allTodoItems.indexOf(taskToDelete);
+    // Remove the task from the array
+    allTodoItems.splice(indexToDelete, 1);
+    // Re-display the updated todos
+    displayTodos();
 }
+
+function showModal(e) {
+    // Get the ID of the clicked task
+    const taskId = e.target.closest('.task').getAttribute('id');
+    // Find the corresponding modal element using the task ID
+    const todo = document.getElementById(taskId);    
+    const modalToShow = todo.querySelector('.modal')    
+    modalToShow.classList.remove('modal-hide');
+    modalToShow.classList.add('modal-show');
+}
+
+
+
+// Display all todos in the todoItems array
+const displayTodos = () => {
+    // Clear existing tasks
+    tasks.innerHTML = '';
+    // Append each todo item to the task list
+    allTodoItems.forEach(todo => {
+        tasks.appendChild(todo);
+    });
+}
+
+
+document.body.addEventListener('click', function(e) {
+    const clickedElement = e.target;
+    // Check if the clicked element is not inside any modal
+    if (!clickedElement.closest('.modal') && !clickedElement.classList.contains('open-modal')) {
+        // Close all modals
+        const allModals = document.querySelectorAll('.modal');
+        allModals.forEach(modal => {
+            modal.classList.remove('modal-show');
+            modal.classList.add('modal-hide');
+        });
+    }
+});
+
+
