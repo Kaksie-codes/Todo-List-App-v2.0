@@ -1,24 +1,65 @@
+import { sayHello } from "./test.js";
 // DOM Manipulators
 const inputEl = document.querySelector('#input');
 const tasks = document.querySelector('.task-box');
-const deleteAllBtn = document.querySelector('.clear-btn')
+const deleteAllBtn = document.querySelector('.clear-btn');
+const dateInputEl = document.querySelector('#date');
+const addBtn = document.querySelector('.add-btn')
 
+sayHello();
+// Functions
+let allTodoItems = JSON.parse(localStorage.getItem('todos')) || [];
+
+displayTodos();
+
+
+// Event Listeners
+addBtn.addEventListener('click', addTodo);
 deleteAllBtn.addEventListener('click', () => {
     allTodoItems = [];
+    localStorage.setItem('todos', JSON.stringify(allTodoItems))
     displayTodos();
 })
-// Event Listeners
-inputEl.addEventListener('keyup', addTodo);
 
-// Functions
-let allTodoItems = [];
+let taskObject;
 
-function addTodo(e) {
-    // Remove unwanted spaces when the user enters a task
-    let task = inputEl.value.trim();
-    if (e.key == 'Enter' && task) {
 
-        // Create a new task once the user presses enter
+// Remove unwanted spaces when the user enters a task
+let task;
+let date;
+
+
+function addTodo(e) { 
+    task = inputEl.value.trim();
+    date = dateInputEl.value;
+
+    taskObject = {
+        task,
+        date
+    }
+   
+    // Add todo item to the array
+    allTodoItems.push(taskObject);
+
+    localStorage.setItem('todos', JSON.stringify(allTodoItems))
+    // console.log(allTodoItems)
+        
+    inputEl.value = '';
+
+    // Call displayTodos to update the display
+    displayTodos();   
+    
+}
+
+// Display all todos in the todoItems array
+function displayTodos(){
+    // Clear existing tasks
+    tasks.innerHTML = '';
+
+    // Append each todo item to the task list
+    allTodoItems.forEach((todo, index) => {
+        // tasks.appendChild(todo);
+        // console.log('todo ==>>', todo)
         const taskEl = document.createElement('li');
         taskEl.classList.add('task');
 
@@ -30,9 +71,22 @@ function addTodo(e) {
         check_el.setAttribute('type', 'checkbox');
         contentEl.appendChild(check_el);
 
-        const task_el = document.createElement('P');
-        contentEl.appendChild(task_el);
-        task_el.innerText = task;
+
+        const spansWrapper = document.createElement('div');
+        contentEl.appendChild(spansWrapper);
+        spansWrapper.classList.add('spans');
+        contentEl.appendChild(spansWrapper);
+
+        const taskSpan = document.createElement('span');
+        taskSpan.textContent = todo.task;
+        taskSpan.classList.add('text');
+        spansWrapper.appendChild(taskSpan);
+
+        const dateSpan = document.createElement('span');
+        dateSpan.textContent = todo.date;
+        dateSpan.classList.add('date');
+        spansWrapper.appendChild(dateSpan);
+
 
         const settingEL = document.createElement('div');
         settingEL.classList.add('settings');
@@ -72,70 +126,13 @@ function addTodo(e) {
 
         settingEL.appendChild(modal) 
 
-        const index = allTodoItems.length;
-        taskEl.setAttribute('id', `todo-${index}`);        
+        // const index = allTodoItems.length;
+        console.log('lenght', index)
+        taskEl.setAttribute('id', `todo-${index}`); 
 
-        // Add todo item to the array
-        allTodoItems.push(taskEl);
-
-        console.log(allTodoItems)
-        
-        // Call displayTodos to update the display
-        displayTodos();
-
-        inputEl.value = '';
-    }
-}
-
-
-
-function editTodo(e) {
-    // Traverse up the DOM to find the parent task element (li)
-    const taskToEdit = e.target.closest('.task');
-    // Find the paragraph element inside the task
-    const paragraph = taskToEdit.querySelector('.content p');
-    // Make the paragraph editable
-    paragraph.contentEditable = true;
-    // Set focus on the paragraph for editing
-    paragraph.focus();
-    const modalToShow = taskToEdit.querySelector('.modal')
-    console.log(modalToShow)
-    modalToShow.classList.remove('modal-show');
-    modalToShow.classList.add('modal-hide');
-}
-
-
-function deleteTodo(e) {
-    // Traverse up the DOM to find the parent task element (li)
-    const taskToDelete = e.target.closest('.task');
-    // Find the index of the task in the todoItems array
-    const indexToDelete = allTodoItems.indexOf(taskToDelete);
-    // Remove the task from the array
-    allTodoItems.splice(indexToDelete, 1);
-    // Re-display the updated todos
-    displayTodos();
-}
-
-function showModal(e) {
-    // Get the ID of the clicked task
-    const taskId = e.target.closest('.task').getAttribute('id');
-    // Find the corresponding modal element using the task ID
-    const todo = document.getElementById(taskId);    
-    const modalToShow = todo.querySelector('.modal')    
-    modalToShow.classList.remove('modal-hide');
-    modalToShow.classList.add('modal-show');
-}
-
-
-
-// Display all todos in the todoItems array
-const displayTodos = () => {
-    // Clear existing tasks
-    tasks.innerHTML = '';
-    // Append each todo item to the task list
-    allTodoItems.forEach(todo => {
-        tasks.appendChild(todo);
+        tasks.appendChild(taskEl)
     });
+    
 }
 
 
@@ -152,4 +149,54 @@ document.body.addEventListener('click', function(e) {
     }
 });
 
+function deleteTodo(e) {
+    // Traverse up the DOM to find the parent task element (li)
+    const taskToDelete = e.target.closest('.task');
+    // Find the index of the task in the todoItems array
+    const indexToDelete = allTodoItems.indexOf(taskToDelete);
+    // Remove the task from the array
+    allTodoItems.splice(indexToDelete, 1);
+    localStorage.setItem('todos', JSON.stringify(allTodoItems))
+    // Re-display the updated todos
+    displayTodos();
+}
 
+function showModal(e) {
+    // Get the ID of the clicked task
+    const taskId = e.target.closest('.task').getAttribute('id');
+    // Find the corresponding modal element using the task ID
+    const todo = document.getElementById(taskId);    
+    const modalToShow = todo.querySelector('.modal')    
+    modalToShow.classList.remove('modal-hide');
+    modalToShow.classList.add('modal-show');
+}
+
+
+
+function editTodo(e) {
+    // Traverse up the DOM to find the parent task element (li)
+    const taskToEdit = e.target.closest('.task');
+    console.log('taskToEdit ==>>',taskToEdit)
+    // Find the paragraph element inside the task
+    const textSpan = taskToEdit.querySelector('.text');
+    // Make the paragraph editable
+    textSpan.contentEditable = true;
+    // Set focus on the paragraph for editing
+    textSpan.focus();
+    const modalToShow = taskToEdit.querySelector('.modal')
+    console.log('modalToShow ==>>',modalToShow)
+    textSpan.addEventListener('input', () => {
+        // Update the task content in the local storage
+        // Get the index of the task being edited
+        const taskId = taskToEdit.getAttribute('id');
+        const taskIndex = parseInt(taskId.split('-')[1]);
+
+        // Update the task content in the array
+        allTodoItems[taskIndex].task = textSpan.textContent;
+
+        // Save the updated todos array in localStorage
+        localStorage.setItem('todos', JSON.stringify(allTodoItems));
+    });
+    modalToShow.classList.remove('modal-show');
+    modalToShow.classList.add('modal-hide');    
+}

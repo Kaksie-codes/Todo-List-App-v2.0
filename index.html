@@ -18,9 +18,15 @@
 
 <body>
     <div class="wrapper">
-        <div class="task-input">
-            <i class="fa fa-bars" aria-hidden="true"></i>
-            <input type="text" id="input" autocomplete="off" placeholder="Add a new Task...">
+        <div class="inputs">
+            <div class="task-input">
+                <i class="fa fa-bars" aria-hidden="true"></i>
+                <input type="text" id="input" autocomplete="off" placeholder="Add a new Task...">
+            </div>
+            <div class="task-input">
+                <i class="fa fa-bars" aria-hidden="true"></i>
+                <input type="date" id="date">
+            </div>
         </div>
         <div class="controls">
             <!-- <div class="filters">
@@ -29,12 +35,16 @@
                 <span id="completed">Completed</span>
             </div> -->
             <button class="clear-btn">Clear All</button>
+            <button class="add-btn">Add Task</button>
         </div>
         <ul class="task-box">           
             <!-- <li class="task">
                 <div class="content">
                     <input type="checkbox">
-                    <p>Get a Girlfriend</p>
+                    <div class="spans">
+                        <span class="text">Get a Girlfriend</span>
+                        <span class="date">6-7-2025</span>
+                    </div>
                 </div>
                 <div class="settings">
                     <i class="fa fa-ellipsis-h open-modal" aria-hidden="true"></i>
@@ -48,7 +58,7 @@
         </ul>
     </div>
     <div class="author"><p>built by Coder1 (n_kay)</p></div>
-    <script src="./script.js"></script>
+    <script type="module" src="./script.js"></script>
 </body>
 
 </html>
